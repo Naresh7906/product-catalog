@@ -1,18 +1,10 @@
-import "./App.css";
-import { ThemeProvider } from "./components/theme/theme-provider";
+import { ProductList } from './components/ProductList';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <div>
-        <h1>Vite + React</h1>
-        <div className="card">
-          <p>
-            Edit <code>src/App.tsx</code> and save to begin
-          </p>
-        </div>
-      </div>
-    </ThemeProvider>
+    <div className="min-h-screen w-screen flex flex-col items-center" style={{ backgroundColor: '#F6F6F8' }}>
+      <ProductList />
+    </div>
   );
 }
 

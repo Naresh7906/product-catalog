@@ -1,0 +1,92 @@
+[
+    {
+        "id": 77,
+        "title": "Cotton classic sneaker",
+        "variants": [
+            {
+                "id": 1,
+                "product_id": 77,
+                "title": "S / White / Cotton",
+                "price": "49.99"
+            },
+            {
+                "id": 2,
+                "product_id": 77,
+                "title": "M / White / Cotton",
+                "price": "49.99"
+            },
+            {
+                "id": 3,
+                "product_id": 77,
+                "title": "L / White / Cotton",
+                "price": "49.99"
+            }
+        ],
+        "image": {
+            "id": 266,
+            "product_id": 77,
+            "src": "https://cdn11.bigcommerce.com/s-p1xcugzp89/products/80/images/272/roundterrariumlarge.1647248662.386.513.jpg?c=1"
+        }
+    },
+    {
+        "id": 80,
+        "title": "Long Socks - Made with natural materials",
+        "variants": [
+            {
+                "id": 64,
+                "product_id": 80,
+                "title": "S / White / Cotton",
+                "price": "3.99"
+            },
+            {
+                "id": 65,
+                "product_id": 80,
+                "title": "M / White / Cotton",
+                "price": "3.99"
+            },
+            {
+                "id": 66,
+                "product_id": 80,
+                "title": "L / White / Cotton",
+                "price": "3.99"
+            }
+        ],
+        "image": {
+            "id": 272,
+            "product_id": 80,
+            "src": "https://cdn11.bigcommerce.com/s-p1xcugzp89/products/80/images/272/roundterrariumlarge.1647248662.386.513.jpg?c=1"
+        }
+    },
+    {
+        "id": 81,
+        "title": "Printed T-shirt",
+        "variants": [
+            {
+                "id": 67,
+                "product_id": 81,
+                "title": "S / White / Cotton",
+                "price": "8.99"
+            },
+            {
+                "id": 68,
+                "product_id": 81,
+                "title": "M / White / Cotton",
+                "price": "8.99"
+            },
+            {
+                "id": 69,
+                "product_id": 81,
+                "title": "L / White / Cotton",
+                "price": "8.99"
+            }
+        ],
+        "image": {
+            "id": 273,
+            "product_id": 81,
+            "src": "https://cdn11.bigcommerce.com/s-p1xcugzp89/products/80/images/272/roundterrariumlarge.1647248662.386.513.jpg?c=1"
+        }
+    }
+]
+
+
+

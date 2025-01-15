@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { ProductPicker } from './ProductPicker';
 import { ProductItem } from './ProductItem';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface Variant {
   id: number;
@@ -49,49 +49,6 @@ export const ProductList = () => {
   }]);
   const [isProductPickerOpen, setIsProductPickerOpen] = useState(false);
   const [editingProductIndex, setEditingProductIndex] = useState<number | null>(null);
-
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-
-    const sourceDroppableId = result.source.droppableId;
-    const destinationDroppableId = result.destination.droppableId;
-
-    // If dragging within the main product list
-    if (sourceDroppableId === 'products' && destinationDroppableId === 'products') {
-      const items = Array.from(products);
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(result.destination.index, 0, reorderedItem);
-      setProducts(items);
-      return;
-    }
-
-    // If dragging within a product's variants
-    if (sourceDroppableId.startsWith('variants-') && destinationDroppableId === sourceDroppableId) {
-      const productIndex = parseInt(sourceDroppableId.split('-')[1]);
-      const newProducts = [...products];
-      const product = { ...newProducts[productIndex] };
-      
-      // Get the actual variants in their current order
-      const currentVariants = product.product.variants.filter(v => 
-        product.selectedVariantIds?.includes(v.id)
-      );
-      
-      // Reorder the variants
-      const [movedVariant] = currentVariants.splice(result.source.index, 1);
-      currentVariants.splice(result.destination.index, 0, movedVariant);
-      
-      // Update the product's variants array to maintain the new order
-      product.product.variants = [
-        ...currentVariants,
-        ...product.product.variants.filter(v => 
-          !product.selectedVariantIds?.includes(v.id)
-        )
-      ];
-      
-      newProducts[productIndex] = product;
-      setProducts(newProducts);
-    }
-  };
 
   const handleAddProduct = () => {
     setEditingProductIndex(null);
@@ -164,6 +121,46 @@ export const ProductList = () => {
     setProducts(newProducts);
   };
 
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const sourceDroppableId = result.source.droppableId;
+    const destinationDroppableId = result.destination.droppableId;
+
+    // If dragging within the main product list
+    if (sourceDroppableId === 'products' && destinationDroppableId === 'products') {
+      const items = Array.from(products);
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(result.destination.index, 0, reorderedItem);
+      setProducts(items);
+    }
+  };
+
+  const handleVariantReorder = (productIndex: number, sourceIndex: number, destinationIndex: number) => {
+    const newProducts = [...products];
+    const product = { ...newProducts[productIndex] };
+    
+    // Get the actual variants in their current order
+    const currentVariants = product.product.variants.filter(v => 
+      product.selectedVariantIds?.includes(v.id)
+    );
+    
+    // Reorder the variants
+    const [movedVariant] = currentVariants.splice(sourceIndex, 1);
+    currentVariants.splice(destinationIndex, 0, movedVariant);
+    
+    // Update the product's variants array to maintain the new order
+    product.product.variants = [
+      ...currentVariants,
+      ...product.product.variants.filter(v => 
+        !product.selectedVariantIds?.includes(v.id)
+      )
+    ];
+    
+    newProducts[productIndex] = product;
+    setProducts(newProducts);
+  };
+
   return (
     <div className="max-w-3xl w-full mx-auto p-6">
       <div style={{ backgroundColor: '#F6F6F8' }} className="rounded-lg p-6">
@@ -197,6 +194,9 @@ export const ProductList = () => {
                             index={index + 1}
                             selectedVariantIds={item.selectedVariantIds}
                             onToggleVariant={(variantId) => handleToggleVariant(index, variantId)}
+                            onVariantReorder={(sourceIndex, destinationIndex) => 
+                              handleVariantReorder(index, sourceIndex, destinationIndex)
+                            }
                           />
                         </div>
                       )}

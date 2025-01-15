@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ChevronDown, ChevronUp, X, GripVertical, Pencil } from 'lucide-react';
-import { DraggableProvidedDragHandleProps, Draggable, Droppable } from '@hello-pangea/dnd';
+import { DraggableProvidedDragHandleProps, Draggable, Droppable, DragDropContext, DropResult } from '@hello-pangea/dnd';
 
 interface Variant {
   id: number;
@@ -39,6 +39,7 @@ interface ProductItemProps {
   index: number;
   selectedVariantIds?: number[];
   onToggleVariant?: (variantId: number) => void;
+  onVariantReorder?: (sourceIndex: number, destinationIndex: number) => void;
 }
 
 export const ProductItem = ({
@@ -52,6 +53,7 @@ export const ProductItem = ({
   index,
   selectedVariantIds = [],
   onToggleVariant,
+  onVariantReorder,
 }: ProductItemProps) => {
   const [showVariants, setShowVariants] = useState(false);
   const [showDiscount, setShowDiscount] = useState(false);
@@ -72,6 +74,11 @@ export const ProductItem = ({
     onDiscountChange({ type: 'percentage', value: 0 });
   };
 
+  const handleVariantDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    onVariantReorder?.(result.source.index, result.destination.index);
+  };
+
   return (
     <div style={{ backgroundColor: '#F6F6F8' }}>
       <div className="flex items-center gap-4 p-4" style={{ backgroundColor: '#F6F6F8' }}>
@@ -79,7 +86,6 @@ export const ProductItem = ({
           <div {...dragHandleProps} className="cursor-grab">
             <GripVertical className="h-5 w-5 text-gray-400" />
           </div>
-          
           <div className="text-gray-500">{index}.</div>
         </div>
         
@@ -162,83 +168,85 @@ export const ProductItem = ({
       )}
 
       {showVariants && selectedVariants.length > 0 && (
-        <Droppable droppableId={`variants-${index}`}>
-          {(provided) => (
-            <div 
-              ref={provided.innerRef} 
-              {...provided.droppableProps}
-              className="mt-2 space-y-2"
-            >
-              {selectedVariants.map((variant, variantIndex) => (
-                <Draggable
-                  key={variant.id}
-                  draggableId={`variant-${variant.id}`}
-                  index={variantIndex}
-                >
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      className="flex items-center gap-4 p-4 ml-12"
-                      style={{ backgroundColor: '#F6F6F8' }}
-                    >
-                      <div {...provided.dragHandleProps} className="cursor-grab">
-                        <GripVertical className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="bg-white shadow-sm rounded-[20px] py-2 px-4">
-                          <div className="font-medium">{variant.title}</div>
+        <DragDropContext onDragEnd={handleVariantDragEnd}>
+          <Droppable droppableId={`variants-${index}`}>
+            {(provided) => (
+              <div 
+                ref={provided.innerRef} 
+                {...provided.droppableProps}
+                className="mt-2 space-y-2"
+              >
+                {selectedVariants.map((variant, variantIndex) => (
+                  <Draggable
+                    key={variant.id}
+                    draggableId={`variant-${variant.id}`}
+                    index={variantIndex}
+                  >
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className="flex items-center gap-4 p-4 ml-12"
+                        style={{ backgroundColor: '#F6F6F8', ...provided.draggableProps.style }}
+                      >
+                        <div {...provided.dragHandleProps} className="cursor-grab">
+                          <GripVertical className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="bg-white shadow-sm rounded-[20px] py-2 px-4">
+                            <div className="font-medium">{variant.title}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {showDiscount && (
+                            <>
+                              <div className="bg-white shadow-sm rounded-[20px]">
+                                <Input
+                                  type="number"
+                                  value={discount?.value || ''}
+                                  onChange={(e) => handleDiscountValueChange(e.target.value)}
+                                  className="w-20 h-9 border-0 focus:ring-0 rounded-[20px]"
+                                  placeholder="0"
+                                />
+                              </div>
+
+                              <div className="bg-white shadow-sm rounded-[20px]">
+                                <Select
+                                  value={discount?.type || 'percentage'}
+                                  onValueChange={handleDiscountTypeChange}
+                                >
+                                  <SelectTrigger className="w-[100px] h-9 border-0 focus:ring-0 rounded-[20px]">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="percentage">% Off</SelectItem>
+                                    <SelectItem value="flat">Flat Off</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </>
+                          )}
+
+                          {selectedVariants.length > 1 && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onToggleVariant?.(variant.id)}
+                              className="text-gray-400 hover:text-gray-600 h-9 w-9"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {showDiscount && (
-                          <>
-                            <div className="bg-white shadow-sm rounded-[20px]">
-                              <Input
-                                type="number"
-                                value={discount?.value || ''}
-                                onChange={(e) => handleDiscountValueChange(e.target.value)}
-                                className="w-20 h-9 border-0 focus:ring-0 rounded-[20px]"
-                                placeholder="0"
-                              />
-                            </div>
-
-                            <div className="bg-white shadow-sm rounded-[20px]">
-                              <Select
-                                value={discount?.type || 'percentage'}
-                                onValueChange={handleDiscountTypeChange}
-                              >
-                                <SelectTrigger className="w-[100px] h-9 border-0 focus:ring-0 rounded-[20px]">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="percentage">% Off</SelectItem>
-                                  <SelectItem value="flat">Flat Off</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </>
-                        )}
-
-                        {selectedVariants.length > 1 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onToggleVariant?.(variant.id)}
-                            className="text-gray-400 hover:text-gray-600 h-9 w-9"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       )}
     </div>
   );

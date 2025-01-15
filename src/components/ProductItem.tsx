@@ -55,7 +55,8 @@ export const ProductItem = ({
 }: ProductItemProps) => {
   const [showVariants, setShowVariants] = useState(false);
   const [showDiscount, setShowDiscount] = useState(false);
-  const hasMultipleVariants = product.variants.length > 1;
+  const selectedVariants = product.variants.filter(v => selectedVariantIds?.includes(v.id));
+  const hasMultipleVariants = selectedVariants.length > 1;
 
   const handleDiscountTypeChange = (type: 'flat' | 'percentage') => {
     onDiscountChange({ type, value: discount?.value || 0 });
@@ -65,8 +66,6 @@ export const ProductItem = ({
     const numValue = parseFloat(value) || 0;
     onDiscountChange({ type: discount?.type || 'percentage', value: numValue });
   };
-
-  const selectedVariants = product.variants.filter(v => selectedVariantIds.includes(v.id));
 
   const handleAddDiscount = () => {
     setShowDiscount(true);
@@ -152,7 +151,7 @@ export const ProductItem = ({
             onClick={() => setShowVariants(!showVariants)}
             className="text-blue-600 text-sm hover:text-blue-700 flex items-center gap-1"
           >
-            {showVariants ? 'Hide variants' : 'Show variants'}
+            {showVariants ? 'Hide variants' : `Show variants (${selectedVariants.length})`}
             {showVariants ? (
               <ChevronUp className="h-4 w-4" />
             ) : (
@@ -162,7 +161,7 @@ export const ProductItem = ({
         </div>
       )}
 
-      {showVariants && (
+      {showVariants && selectedVariants.length > 0 && (
         <Droppable droppableId={`variants-${index}`}>
           {(provided) => (
             <div 
@@ -221,14 +220,16 @@ export const ProductItem = ({
                           </>
                         )}
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onToggleVariant?.(variant.id)}
-                          className="text-gray-400 hover:text-gray-600 h-9 w-9"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        {selectedVariants.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onToggleVariant?.(variant.id)}
+                            className="text-gray-400 hover:text-gray-600 h-9 w-9"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   )}

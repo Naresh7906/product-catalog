@@ -70,10 +70,24 @@ export const ProductList = () => {
       const productIndex = parseInt(sourceDroppableId.split('-')[1]);
       const newProducts = [...products];
       const product = { ...newProducts[productIndex] };
-      const variants = [...product.product.variants];
-      const [movedVariant] = variants.splice(result.source.index, 1);
-      variants.splice(result.destination.index, 0, movedVariant);
-      product.product.variants = variants;
+      
+      // Get the actual variants in their current order
+      const currentVariants = product.product.variants.filter(v => 
+        product.selectedVariantIds?.includes(v.id)
+      );
+      
+      // Reorder the variants
+      const [movedVariant] = currentVariants.splice(result.source.index, 1);
+      currentVariants.splice(result.destination.index, 0, movedVariant);
+      
+      // Update the product's variants array to maintain the new order
+      product.product.variants = [
+        ...currentVariants,
+        ...product.product.variants.filter(v => 
+          !product.selectedVariantIds?.includes(v.id)
+        )
+      ];
+      
       newProducts[productIndex] = product;
       setProducts(newProducts);
     }
@@ -103,7 +117,8 @@ export const ProductList = () => {
         id: `${product.id}-${Date.now()}`,
         product,
         discount: null,
-        selectedVariantIds: product.variants.map(v => v.id)
+        selectedVariantIds: product.variants.map(v => v.id), // Initialize with all variants selected
+        showVariants: false
       })));
       setProducts(newProducts);
     } else {
@@ -114,7 +129,8 @@ export const ProductList = () => {
           id: `${product.id}-${Date.now()}`,
           product,
           discount: null,
-          selectedVariantIds: product.variants.map(v => v.id)
+          selectedVariantIds: product.variants.map(v => v.id), // Initialize with all variants selected
+          showVariants: false
         }))
       ]);
     }
@@ -139,7 +155,10 @@ export const ProductList = () => {
     if (variantIndex === -1) {
       product.selectedVariantIds.push(variantId);
     } else {
-      product.selectedVariantIds.splice(variantIndex, 1);
+      // Only allow removing if there will be at least one variant left
+      if (product.selectedVariantIds.length > 1) {
+        product.selectedVariantIds.splice(variantIndex, 1);
+      }
     }
     
     setProducts(newProducts);
